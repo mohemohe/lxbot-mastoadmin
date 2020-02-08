@@ -1,0 +1,55 @@
+---
+version: "3.6"
+services:
+  lxbot:
+    image: lxbot/lxbot:latest
+    env_file:
+      - .env
+    networks:
+      - wan
+      - lan
+    ports:
+      - 1323:1323
+    volumes:
+      - adapter:/lxbot/adapters
+      - store:/lxbot/stores
+      - plugin-help:/lxbot/plugins/help
+      - script:/lxbot/scripts
+    depends_on:
+      - mongo
+    restart: on-failure
+  adapter:
+    image: lxbot/adapter-mastodon
+    volumes:
+      - adapter:/lxbot/adapters
+  store:
+    image: lxbot/store-mongodb
+    volumes:
+      - store:/lxbot/stores
+  plugin-help:
+    image: lxbot/plugin-help
+    volumes:
+      - plugin-help:/lxbot/plugins
+  script:
+    build: .
+    volumes:
+      - script:/lxbot/scripts
+  mongo:
+    image: mongo:4.0
+    networks:
+      - lan
+    volumes:
+      - mongo-db:/data/db
+      - mongo-configdb:/data/configdb
+    restart: on-failure
+volumes:
+  mongo-db:
+  mongo-configdb:
+  adapter:
+  store:
+  plugin-help:
+  script:
+networks:
+  wan:
+  lan:
+    internal: true
