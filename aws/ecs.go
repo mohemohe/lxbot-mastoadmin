@@ -94,9 +94,12 @@ func ScaleService(name string, count int) bool {
 		HealthCheckGracePeriodSeconds: aws.Int64(int64(60)),
 		DeploymentConfiguration: &ecs.DeploymentConfiguration{
 			MaximumPercent:        aws.Int64(int64(200)),
-			MinimumHealthyPercent: aws.Int64(int64(25)),
+			MinimumHealthyPercent: aws.Int64(int64(50)),
 		},
 	}
 	_, err = e.UpdateService(updateInput)
+	if err != nil {
+		log.Println(err)
+	}
 	return err == nil
 }
