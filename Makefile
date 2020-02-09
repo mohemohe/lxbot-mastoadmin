@@ -4,6 +4,7 @@ build:
 	go build -buildmode=plugin -o script.so script.go
 
 run:
+	docker-compose kill
 	docker-compose rm -f lxbot
 	docker-compose rm -f script
 	docker volume rm -f $(shell basename $(CURDIR))_script

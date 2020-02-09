@@ -4,13 +4,13 @@ name: default
 
 workspace:
   base: /go
-  path: src/github.com/lxbot/script-debug
+  path: src/github.com/mohemohe/lxbot-mastoadmin
 
 steps:
   - name: docker
     image: plugins/docker
     settings:
-      repo: lxbot/script-debug
+      repo: mohemohe/lxbot-mastoadmin
       username:
         from_secret: dockerhub_username
       password:

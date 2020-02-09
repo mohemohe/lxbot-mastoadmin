@@ -2,16 +2,17 @@ package main
 
 import (
 	"github.com/lxbot/lxlib"
+	"github.com/mohemohe/lxbot-mastoadmin/aws"
+	"github.com/mohemohe/lxbot-mastoadmin/util"
 	"log"
 	"plugin"
 )
 
-type M = map[string]interface{}
 
 var store *lxlib.Store
-var ch *chan M
+var ch *chan util.M
 
-func Boot(s *plugin.Plugin, c *chan M) {
+func Boot(s *plugin.Plugin, c *chan util.M) {
 	var err error
 	store, err = lxlib.NewStore(s)
 	if err != nil {
@@ -20,15 +21,27 @@ func Boot(s *plugin.Plugin, c *chan M) {
 	ch = c
 }
 
-func OnMessage() []func(M) M {
-	return []func(M) M{
+func Help() string {
+	t := `ping: pong
+check: アクセス権限チェック
+` + aws.Help()
+
+	return t
+}
+
+func OnMessage() []func(util.M) util.M {
+	return []func(util.M) util.M{
 		ping,
+		check,
+		aws.EcsServiceLs,
+		aws.EcsServiceStatus,
+		aws.EcsServiceScale,
 	}
 }
 
-func ping(msg M) M {
+func ping(msg util.M) util.M {
 	m, err := lxlib.NewLXMessage(msg)
-	if isErr(err) || !isReply(msg) {
+	if util.IsErr(err) || !util.IsReply(msg) {
 		return nil
 	}
 
@@ -37,20 +50,31 @@ func ping(msg M) M {
 	}
 
 	r, err := m.SetText("pong").Reply().ToMap()
-	if isErr(err) {
+	if util.IsErr(err) {
 		return nil
 	}
 	return r
 }
 
-func isErr(err error) bool {
-	if err != nil {
-		log.Println(err)
-		return true
+func check(msg util.M) util.M {
+	m, err := lxlib.NewLXMessage(msg)
+	if util.IsErr(err) || !util.IsReply(msg) {
+		return nil
 	}
-	return false
-}
 
-func isReply(msg M) bool {
-	return msg["is_reply"] != nil && msg["is_reply"].(bool)
+	if m.Message.Text != "check" {
+		return nil
+	}
+
+	if util.IsRoot(m) {
+		m.SetText("キミの権限は root だよ")
+	} else {
+		m.SetText("キミに操作権限は無いよ")
+	}
+
+	r, err := m.Reply().ToMap()
+	if util.IsErr(err) {
+		return nil
+	}
+	return r
 }
