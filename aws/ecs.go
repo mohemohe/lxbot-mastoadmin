@@ -15,7 +15,6 @@ type (
 		RunningCount int
 		PendingCount int
 		DesiredCount int
-
 	}
 )
 
@@ -91,11 +90,8 @@ func ScaleService(name string, count int) bool {
 		Service: target.ServiceName,
 		DesiredCount: aws.Int64(int64(count)),
 		ForceNewDeployment: aws.Bool(true),
-		HealthCheckGracePeriodSeconds: aws.Int64(int64(60)),
-		DeploymentConfiguration: &ecs.DeploymentConfiguration{
-			MaximumPercent:        aws.Int64(int64(200)),
-			MinimumHealthyPercent: aws.Int64(int64(50)),
-		},
+		HealthCheckGracePeriodSeconds: target.HealthCheckGracePeriodSeconds,
+		DeploymentConfiguration: target.DeploymentConfiguration,
 	}
 	_, err = e.UpdateService(updateInput)
 	if err != nil {
