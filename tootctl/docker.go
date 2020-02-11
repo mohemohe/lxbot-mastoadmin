@@ -31,11 +31,9 @@ func deepCopy(msg util.M) (util.M, error) {
 	return r, nil
 }
 
-func generateText(stdout []string, stderr []string, tag string) string {
+func generateText(stdout []string, tag string) string {
 	stdoutText := strings.Join(stdout, "\n")
-	stderrText := strings.Join(stderr, "\n")
-
-	return "STDOUT " + tag + "\n\n" + "```\n" + stdoutText + "\n```\n\nSTDERR " + tag + "\n\n" + "```\n" + stderrText + "\n```"
+	return tag + "\n\n" + stdoutText
 }
 
 func run(msg util.M, script string, ch *chan util.M) {
@@ -65,7 +63,6 @@ func run(msg util.M, script string, ch *chan util.M) {
 	}
 
 	stdoutBuff := util.NewBuff()
-	stderrBuff := util.NewBuff()
 	buffCh := make(chan int)
 	timeout := false
 
@@ -86,7 +83,7 @@ func run(msg util.M, script string, ch *chan util.M) {
 
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			stderrBuff.Enqueue(scanner.Text())
+			stdoutBuff.Enqueue(scanner.Text())
 			buffCh <- 1
 		}
 
@@ -102,22 +99,16 @@ func run(msg util.M, script string, ch *chan util.M) {
 					return
 				}
 				stdoutBuffLen := stdoutBuff.Len()
-				stderrBuffLen := stderrBuff.Len()
-				if stdoutBuffLen >= lines || stderrBuffLen >= lines {
+				if stdoutBuffLen >= lines {
 					waitCh = time.After(3 * time.Second)
 
 					stdoutLen := lines
 					if stdoutBuffLen < lines {
 						stdoutLen = stdoutBuffLen
 					}
-					stderrLen := lines
-					if stderrBuffLen < lines {
-						stderrLen = stderrBuffLen
-					}
 
 					stdoutLines := stdoutBuff.BulkDequeue(stdoutLen)
-					stderrLines := stderrBuff.BulkDequeue(stderrLen)
-					text := generateText(stdoutLines, stderrLines, "(PARTIAL)")
+					text := generateText(stdoutLines, "(PARTIAL)")
 
 					// FIXME: copy error
 					nextMsg, _ := deepCopy(msg)
@@ -130,11 +121,10 @@ func run(msg util.M, script string, ch *chan util.M) {
 				waitCh = time.After(3 * time.Second)
 
 				stdoutLines := stdoutBuff.DequeueALL()
-				stderrLines := stderrBuff.DequeueALL()
-				if len(stdoutLines) == 0 && len(stderrLines) == 0 {
+				if len(stdoutLines) == 0 {
 					break
 				}
-				text := generateText(stdoutLines, stderrLines, "(PARTIAL)")
+				text := generateText(stdoutLines, "(PARTIAL)")
 
 				// FIXME: copy error
 				nextMsg, _ := deepCopy(msg)
@@ -161,8 +151,7 @@ func run(msg util.M, script string, ch *chan util.M) {
 		tag = "(TIMEOUT)"
 	}
 	stdoutLines := stdoutBuff.DequeueALL()
-	stderrLines := stderrBuff.DequeueALL()
-	text := generateText(stdoutLines, stderrLines, tag)
+	text := generateText(stdoutLines, tag)
 
 	// FIXME: copy error
 	nextMsg, err := deepCopy(msg)
