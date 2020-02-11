@@ -18,7 +18,7 @@ RUN mv /go/src/$GOLANG_NAMESPACE/script.so /lxbot/scripts/
 
 FROM alpine
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates docker
 COPY --from=builder /etc/localtime /etc/localtime
 COPY --from=builder /lxbot /lxbot
 

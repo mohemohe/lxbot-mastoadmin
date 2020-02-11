@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/lxbot/lxlib"
 	"github.com/mohemohe/lxbot-mastoadmin/aws"
+	"github.com/mohemohe/lxbot-mastoadmin/tootctl"
 	"github.com/mohemohe/lxbot-mastoadmin/util"
 	"log"
 	"plugin"
@@ -24,7 +25,7 @@ func Boot(s *plugin.Plugin, c *chan util.M) {
 func Help() string {
 	t := `ping: pong
 check: アクセス権限チェック
-` + aws.Help()
+` + aws.Help() + tootctl.Help()
 
 	return t
 }
@@ -36,6 +37,9 @@ func OnMessage() []func(util.M) util.M {
 		aws.EcsServiceLs,
 		aws.EcsServiceStatus,
 		aws.EcsServiceScale,
+		func(m util.M) util.M {
+			return tootctl.Tootctl(m, ch)
+		},
 	}
 }
 
