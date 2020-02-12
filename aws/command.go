@@ -51,7 +51,18 @@ func EcsServiceStatus(msg util.M) util.M {
 	if status == nil {
 		return nil
 	}
-	text := status.Name + "\n" + "STATUS: " + status.Status + "\n" + "DESIRED: " + strconv.Itoa(status.DesiredCount) + "\n" + "RUNNING: " + strconv.Itoa(status.RunningCount) + "\n" + "PENDING: " + strconv.Itoa(status.PendingCount)
+	text := status.Name + "\n" +
+		"STATUS: " + status.Status + "\n" +
+		"DESIRED: " + strconv.Itoa(status.DesiredCount) + "\n" +
+		"RUNNING: " + strconv.Itoa(status.RunningCount) + "\n" +
+		"PENDING: " + strconv.Itoa(status.PendingCount) + "\n"
+	for _, v := range status.Tasks {
+		text += "\n" + v.Name + "\n" +
+			"IMAGE: " + v.Image + "\n" +
+			"CPU: " + strconv.Itoa(v.CPU) + "\n" +
+			"RAM: " + strconv.Itoa(v.Memory) + "\n"
+	}
+
 	r, err := m.SetText(text).Reply().ToMap()
 	if util.IsErr(err) {
 		return nil
@@ -90,7 +101,7 @@ func EcsServiceScale(msg util.M) util.M {
 	} else if ok := ScaleService(name, count); !ok {
 		text = name + " のタスク数の変更に失敗しちゃった"
 	} else {
-		text = name + " のタスク数を "+ countStr + " にしたよ"
+		text = name + " のタスク数を " + countStr + " にしたよ"
 	}
 	r, err := m.SetText(text).Reply().ToMap()
 	if util.IsErr(err) {

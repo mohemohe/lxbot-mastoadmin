@@ -1,7 +1,7 @@
 package util
 
 import (
-"sync"
+	"sync"
 )
 
 type (

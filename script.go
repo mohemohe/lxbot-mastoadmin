@@ -9,7 +9,6 @@ import (
 	"plugin"
 )
 
-
 var store *lxlib.Store
 var ch *chan util.M
 
