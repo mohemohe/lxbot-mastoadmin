@@ -21,6 +21,6 @@ func Tootctl(msg util.M, ch *chan util.M) util.M {
 	}
 
 	script := strings.Join(strings.Split(m.Message.Text, "\n"), " ")
-	go run(msg, script, ch)
+	go Run(msg, script, ch)
 	return nil
 }

@@ -36,7 +36,7 @@ func generateText(stdout []string, tag string) string {
 	return tag + "\n\n" + stdoutText
 }
 
-func run(msg util.M, script string, ch *chan util.M) {
+func Run(msg util.M, script string, ch *chan util.M) {
 	args := []string{"run", "--rm", "-i", "--log-driver", "none"}
 	for _, v := range os.Environ() {
 		if strings.HasPrefix(v, "PATH") {
